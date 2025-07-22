@@ -29,7 +29,19 @@ jQuery(document).ready(function($) {
     });
     
     function updateFileList(files) {
-        // Display selected files
+        const fileList = $('<ul class="file-list"></ul>');
+        
+        for (let i = 0; i < files.length; i++) {
+            fileList.append(`
+                <li>
+                    <span class="file-name">${files[i].name}</span>
+                    <span class="file-size">${formatFileSize(files[i].size)}</span>
+                </li>
+            `);
+        }
+        
+        $('.upload-area').find('.file-list').remove();
+        $('.upload-area').append(fileList);
     }
     
     // Handle form submission
@@ -40,15 +52,23 @@ jQuery(document).ready(function($) {
         const files = fileInput.files;
         
         if (files.length === 0) {
-            alert('Please select at least one file');
+            showUploadError('Please select at least one file');
             return;
         }
         
+        // Add required parameters
+        formData.append('action', 'handle_file_upload');
+        formData.append('nonce', cloudUploader.nonce);
+        
+        // Add files
         for (let i = 0; i < files.length; i++) {
-            formData.append('files[]', files[i]);
+            formData.append('cloud_uploader_files[]', files[i]);
         }
         
         $('.progress-container').show();
+        $('.upload-button').prop('disabled', true);
+        $('.progress-bar').css('width', '0%');
+        $('.progress-text').text('0%');
         
         $.ajax({
             url: cloudUploader.ajaxurl,
@@ -68,30 +88,54 @@ jQuery(document).ready(function($) {
                 });
                 return xhr;
             },
-            beforeSend: function(xhr) {
-                xhr.setRequestHeader('X-WP-Nonce', cloudUploader.nonce);
-            },
             success: function(response) {
                 if (response.success) {
                     displayUploadResults(response.data.files);
                 } else {
-                    alert('Error: ' + response.data);
+                    showUploadError(response.data || 'Unknown error occurred');
                 }
             },
-            error: function(xhr, status, error) {
-                alert('Upload failed: ' + error);
+            error: function(xhr) {
+                let errorMessage = 'Upload failed';
+                try {
+                    const response = JSON.parse(xhr.responseText);
+                    if (response.data) {
+                        errorMessage += ': ' + response.data;
+                    } else if (xhr.statusText) {
+                        errorMessage += ': ' + xhr.statusText;
+                    }
+                } catch (e) {
+                    errorMessage += ': Server error occurred';
+                }
+                showUploadError(errorMessage);
             },
             complete: function() {
                 $('.progress-container').hide();
+                $('.upload-button').prop('disabled', false);
             }
         });
     });
+    
+    function showUploadError(message) {
+        const errorDiv = $('<div class="upload-error">')
+            .text(message)
+            .css({
+                'color': 'red',
+                'margin-top': '10px',
+                'padding': '10px',
+                'border': '1px solid red',
+                'border-radius': '4px'
+            });
+        
+        $('.upload-results').empty().append(errorDiv);
+        setTimeout(() => errorDiv.fadeOut(), 5000);
+    }
     
     function displayUploadResults(files) {
         const resultsContainer = $('.upload-results');
         resultsContainer.empty();
         
-        if (files.length === 0) {
+        if (!files || files.length === 0) {
             resultsContainer.append('<p>No files were uploaded</p>');
             return;
         }
@@ -123,6 +167,8 @@ jQuery(document).ready(function($) {
                 setTimeout(() => {
                     $(this).text('Copy Link');
                 }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy URL: ', err);
             });
         });
     }

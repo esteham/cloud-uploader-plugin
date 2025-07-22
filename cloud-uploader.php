@@ -51,4 +51,3 @@ function cloud_uploader_assets() {
 }
 add_action('wp_enqueue_scripts', 'cloud_uploader_assets');
 add_action('admin_enqueue_scripts', 'cloud_uploader_assets');
-

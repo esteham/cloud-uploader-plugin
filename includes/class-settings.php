@@ -30,7 +30,7 @@ class Cloud_Uploader_Settings {
         $this->add_settings_field('aws_access_key', 'AWS Access Key', 'render_text_field', 'aws');
         $this->add_settings_field('aws_secret_key', 'AWS Secret Key', 'render_text_field', 'aws');
         $this->add_settings_field('aws_bucket_name', 'AWS Bucket Name', 'render_text_field', 'aws');
-        // Add similar fields for other providers
+        $this->add_settings_field('aws_region', 'AWS Region', 'render_text_field', 'aws');
     }
     
     private function add_settings_field($id, $title, $callback, $provider = '') {
