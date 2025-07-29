@@ -16,9 +16,9 @@
 
 ```bash
 git clone https://github.com/esteham/cloud-uploader-plugin.git
-
+```
     Upload the plugin folder to your WordPress wp-content/plugins/ directory.
-
+`
     Go to your WordPress admin dashboard:
 
         Navigate to Plugins > Installed Plugins
@@ -40,14 +40,14 @@ After activation, you will find a new menu or upload option (based on plugin str
     ⚠️ Note: Make sure you configure any required API keys or cloud credentials inside the plugin settings.
 
 📁 Folder Structure
-
+```
 cloud-uploader-plugin/
 ├── includes/
 ├── assets/
 ├── cloud-uploader.php
 ├── readme.txt
 └── ...
-
+```
 🔧 Requirements
 
     WordPress 5.0+
